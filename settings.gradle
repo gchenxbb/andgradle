@@ -1,9 +1,13 @@
 println "##################### settings.gradle文件入口，gradle开始！#####################"
 
 println "##################### 引入模块!"
+println " 根目录："+rootDir
 
 include ':app'
+project(':app').projectDir=new File(rootDir,'app')
+
 include ':gradle_plugin'
+project(':gradle_plugin').projectDir=new File(rootDir,'plugin/gradle_plugin')
 
 println "##################### settings.gradle文件结束!"
 println ' '

@@ -3,10 +3,16 @@ println "##################### 示例文件 example.gradle 开始!"
 println "##################### 示例文件里都是一些定义的非自动执行的任务!"
 
 //#下面是定义一些简单任务#
+//创建的任务都是Project的一个属性，属性名即任务名。
+
 //Hello任务
-task root_task_hello << {
-    String hello = "Hello World Gradle!"
+Task root_task_hello=task(root_task_hello,group:BasePlugin.UPLOAD_GROUP)
+root_task_hello.doLast {
+    description 'Hello World Task!'//AS中选中该项任务，光标选中可以看到描述
+    String hello = 'Hello World Gradle!'
     println hello;
+    println "任务描述：${description}"
+    println "任务分组：${root_task_hello.group}"
 }
 
 //任务1
@@ -18,22 +24,24 @@ task root_task_1 << {
 //任务2，依赖任务1
 //因为2依赖1，因此gradle -q root_task_2，会先输出root_task_1
 task root_task_2(dependsOn: 'root_task_1') << {
+    description "渠道包"
     println "我依赖 dependsOn 其他任务！"
 }
 //定义几个被依赖的task
-task lib1 << {
-    println 'lib1'
+task packageChannel_release_1 << {
+    println '打印：package_release_1'
 }
-task lib2 << {
-    println 'lib2'
+task packageChannel_release_2 << {
+    println '打印：package_release_2'
 }
-task notALib << {
-    println 'notALib'
+task packageChannel_release_3 << {
+    println '打印：package_release_3'
 }
-//任务2同时依赖以上带lib的任务，过滤处lib1和lib2
+//任务2同时依赖以上带packageChannel的任务，过滤出上面的3个
 root_task_2.dependsOn {
-    tasks.findAll { task -> task.name.startsWith('lib') }
+    tasks.findAll { task -> task.name.startsWith('packageChannel') }
 }
+
 
 //任务3，输出0-6数字
 task root_task_3 << {
@@ -50,22 +58,24 @@ task root_task_3 << {
 }
 
 //任务4，任务间通信。
-//doFirst 和 doLast 可以进行多次调用。他们分别被添加在任务的开头和结尾
+//doFirst和doLast 可以进行多次调用。他们分别被添加在任务的开头和结尾
+//<<可以替代oLast。
 task root_task_4 << {
-    println "我是任务4，任务名称：root_task_4！"//第二打印
+    println "我是任务4，任务名称：$root_task_4.name！"//第二打印
 }
 root_task_4.doFirst {
-    println "我在任务4前面打印！$root_task_4.name"//最先打印
+    println "我在任务4前面打印！$root_task_4.name!"//最先打印
 }
 root_task_4.doLast {
-    println "我在任务4后面打印！"//第三打印
+    println "我在任务4后面打印！$root_task_4.name!"//第三打印
 }
 root_task_4 << {
     println "最后打印，任务4！" //最后打印
 }
 
 //任务5，自定义属性
-task root_task_5 << {
+//将任务5设置成自动执行才会让任务6看到自定义的属性myFirstProperty
+task root_task_5 {
     println '自定义属性！'
     Map<String, ?> map = project.getProperties();
     Iterator i = map.entrySet().iterator();
@@ -82,8 +92,12 @@ task root_task_6 << {
     println '打印自定义属性！'
     println root_task_5.myFirstProperty
 }
-//有这个属性，才会执行任务6
-root_task_6.onlyIf { project.hasProperty('NoSkipTask6') }
+//有这个属性，返回true，才会执行任务6
+root_task_6.onlyIf {
+    def execute = false;
+    execute = project.hasProperty('NoSkipTask6')
+    execute
+}
 
 //任务7，打印当前目录下的文件名
 task root_task_7 << {
@@ -110,7 +124,8 @@ task root_task_9_default << {
 
 //任务10，打印某个任务的路径。
 task root_task_t_10 << {
-    println tasks.getByPath('root_task_hello').path;
+    println tasks.getByPath('root_task_hello').path
+    println tasks.getByPath('root_task_hello').name
 }
 
 //任务11，coyp任务，从copy_src目录到coyp_des目录
@@ -123,5 +138,13 @@ root_task_t_11 {
 }
 //禁用任务11
 root_task_t_11.enabled = false;
+
+//任务12
+task root_task_t_12 <<{
+    println "自定义属性：${age}"
+    println "自定义属性：${myname}"
+    println "自定义属性："+rootProject.ext.phone
+}
+
 
 println "##################### 示例文件 example.gradle 结束!"

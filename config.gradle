@@ -1,6 +1,25 @@
 //根工程的build.gradle引入的gradle文件
 println "##################### 配置文件 config.gradle 开始!"
 
+//设定project自定义属性值
+ext {
+    age=30
+    phone=13162683391
+    address='shanghai'
+    myname='chen'
+    sex='man'
+    NoSkipTask6=1
+}
+
+ext {
+    compileSdkVersion=26
+    applicationId="com.app.gradle"
+    minSdkVersion=19
+    targetSdkVersion=26
+    versionCode=1
+    versionName='1.0'
+}
+
 //不带<<的任务，无论执行啥task都被执行
 task config_task_auto {
     println '自动任务执行，任务名称：config_task_auto !'
@@ -21,6 +40,5 @@ gradle.taskGraph.whenReady { taskGraph ->
         version = '1.0-SNAPSHOT'
     }
 }
-
 
 println "##################### 配置文件 config.gradle 结束!"
