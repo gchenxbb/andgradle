@@ -1,0 +1,26 @@
+//根工程的build.gradle引入的gradle文件
+println "##################### 配置文件 config.gradle 开始!"
+
+//不带<<的任务，无论执行啥task都被执行
+task config_task_auto {
+    println '自动任务执行，任务名称：config_task_auto !'
+}
+
+//依赖任务不同输出
+//whenReady 会在已发布的任务之前影响到已发布任务的执行。即使已发布的任务不是主要任务
+task distribution << {
+    println "we build the zip with version=$version"
+}
+task release(dependsOn: 'distribution') << {
+    println 'we release now'
+}
+gradle.taskGraph.whenReady { taskGraph ->
+    if (taskGraph.hasTask(release)) {
+        version = '1.0'
+    } else {
+        version = '1.0-SNAPSHOT'
+    }
+}
+
+
+println "##################### 配置文件 config.gradle 结束!"

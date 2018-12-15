@@ -1,0 +1,73 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+println ' '
+println "##################### 项目目录下的 build.gradle 开始! "
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+
+//不带<<的任务，无论执行任何任务，它都会被执行
+task auto_task1 {
+    println '自动执行任务1，任务名称：auto_task1!'
+}
+
+//不带<<的任务，无论执行任何任务，它都会被执行
+task auto_task2 {
+    println '自动执行任务2，任务名称：auto_task2!'
+}
+
+//引入config.gradle和example.gradle文件，执行完再回来。
+apply from: 'config.gradle'
+apply from: 'example.gradle'
+
+//首先执行。
+//buildscript，为了Gradle脚本自身的执行，自身需要使用的资源，获取脚本依赖插件，在Android中，我们的构建脚本就是Gradle。
+//在脚本中使用一些第三方插件，类库等，需要手动添加这些插件类库的引用
+//这些不是直接服务项目，而是支持其他build脚本的运行，因此，放在buildscript代码块。
+//gradle执行脚本时，优先执行buildscript代码块中的内容。
+buildscript {
+    println "项目首先执行 buildscript 代码!!! "
+    //gradle仓库
+    //Repository 是文件的集合，这些文件通过group、name和version组织起来。
+    //在使用上，主要体现为jar和xml文件
+    //gradle不设置默认仓库，它支持多种仓库，如maven，通过文件或http访问
+    //repositories{}表示代码仓库的下载来源。
+
+    //工程支持多个仓库。
+    //gradle，按照文件中仓库的顺序寻找所需依赖文件，如jar包，若某个仓库找到了，就不会再其他仓库寻找
+    repositories {
+        jcenter()
+        google()
+        //mavenLocal() //本地库，local repository(${user.home}/.m2/repository)
+        mavenCentral()//Maven中心库(http://repo1.maven.org/maven2)
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.0.0'
+    }
+}
+
+//allprojects指定所有参与构建的项目使用的仓库的来源
+//从根目录开始，一直到include进来的所有module，都会执行allprojects的内容。
+allprojects {
+    println "allprojects：项目所有module使用的仓库来源!!"
+    repositories {
+        google()
+        jcenter()
+    }
+}
+
+println "##################### 项目目录下的 build.gradle 结束! "
+println ' '
+
+
+
+
+
+
+
+
+
+
+
+
+

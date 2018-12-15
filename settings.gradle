@@ -1,0 +1,9 @@
+println "##################### settings.gradle文件入口，gradle开始！#####################"
+
+println "##################### 引入模块!"
+
+include ':app'
+include ':gradle_plugin'
+
+println "##################### settings.gradle文件结束!"
+println ' '

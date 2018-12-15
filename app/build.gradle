@@ -1,0 +1,116 @@
+println " "
+println "##################### app模块的 build.gradle 开始! "
+
+apply plugin: 'com.android.application'
+
+//android配置
+android {
+    compileSdkVersion 26
+    defaultConfig {
+        applicationId "com.app.gradle"
+        minSdkVersion 19
+        targetSdkVersion 26
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.android.support:appcompat-v7:26.1.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+}
+
+
+println "##下面是闭包"
+
+//闭包赋值给变量
+def code = {
+    123456789
+};
+def innerClosure = {
+    String x ->
+        printf("打印，闭包 " + this + "\n");
+        printf("打印，闭包 " + owner + "\n");
+        printf("打印，闭包 " + delegate + "\n");
+        printf("闭包传入参数是：${x}\n");
+        ;
+}
+//执行闭包对象
+println code.call();
+//两种调用方式
+innerClosure("in_value")
+innerClosure.call("in_value");
+
+//闭包内部，有三个内置对象this，owner，delegate
+//this 永远是指定义该闭包类，如果存在内部类，则是最内层的类，但this不是指当前闭包对象
+//owner 永远是指定义该闭包的类或者闭包，顾名思义，闭包只能定义在类中或者闭包中
+//delegate 默认是指owner，可以自己设置，自己设置的话又是什么情况
+
+println "##闭包结束"
+
+buildscript {
+    println "app模块首先执行 buildscript 代码!!!!"
+    repositories {
+        maven {//引入自定义的插件，在外部repo目录下
+            url uri('../repo')
+        }
+    }
+    dependencies {
+        classpath 'com.gradle.plugin:gradle_plugin:1.0.0'//组名+库名+版本号
+    }
+}
+
+//引入插件，名字在插件库的properties类型的名。
+apply plugin: 'gradle.plugin'
+
+//这些是groovy类，要写到groovy文件里
+//例子,定义实体类
+class Persion {
+    String name
+    int age
+
+    void eat(String food) {
+        println("好难吃的${food}");
+    }
+
+    @Override
+    String toString() {
+        return "Person{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                '}'
+    }
+}
+
+class Main {
+    def chenguang = {
+        name = "chen"
+        age = 32
+        eat("包子")
+    }
+
+    static void main(String... args) {
+        Main main = new Main()
+        Persion persion = new Persion(name: "lilei", age: 14)
+        printf 'hello bibao?--------------'
+        println persion.toString()
+        main.chenguang.delegate = persion
+        main.chenguang.call()
+        println persion.toString()
+    }
+}
+
+//自动任务
+task app_auto_task {
+    println 'app模块自动执行任务，任务名称：app_auto_task !'
+}
+
+println "##################### app模块的 build.gradle 结束! "
+println ' '

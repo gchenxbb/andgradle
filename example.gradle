@@ -1,0 +1,127 @@
+//根工程的build.gradle引入的gradle文件
+println "##################### 示例文件 example.gradle 开始!"
+println "##################### 示例文件里都是一些定义的非自动执行的任务!"
+
+//#下面是定义一些简单任务#
+//Hello任务
+task root_task_hello << {
+    String hello = "Hello World Gradle!"
+    println hello;
+}
+
+//任务1
+task root_task_1 << {
+    String s = 'my_name'
+    println "Original:" + s + " Upper case:" + s.toUpperCase();
+}
+
+//任务2，依赖任务1
+//因为2依赖1，因此gradle -q root_task_2，会先输出root_task_1
+task root_task_2(dependsOn: 'root_task_1') << {
+    println "我依赖 dependsOn 其他任务！"
+}
+//定义几个被依赖的task
+task lib1 << {
+    println 'lib1'
+}
+task lib2 << {
+    println 'lib2'
+}
+task notALib << {
+    println 'notALib'
+}
+//任务2同时依赖以上带lib的任务，过滤处lib1和lib2
+root_task_2.dependsOn {
+    tasks.findAll { task -> task.name.startsWith('lib') }
+}
+
+//任务3，输出0-6数字
+task root_task_3 << {
+    6.times { print "输出：$it  \n" }
+}
+
+//动态任务,counter类似于传参，任务操纵
+//执行gradle -q task1，gradle -q task2，打印不同的counter
+//动态定义3个任务
+3.times { counter ->
+    task "root_dynamic_task$counter" << {
+        println "我是动态任务，任务名称：root_dynamic_task$counter !"
+    }
+}
+
+//任务4，任务间通信。
+//doFirst 和 doLast 可以进行多次调用。他们分别被添加在任务的开头和结尾
+task root_task_4 << {
+    println "我是任务4，任务名称：root_task_4！"//第二打印
+}
+root_task_4.doFirst {
+    println "我在任务4前面打印！$root_task_4.name"//最先打印
+}
+root_task_4.doLast {
+    println "我在任务4后面打印！"//第三打印
+}
+root_task_4 << {
+    println "最后打印，任务4！" //最后打印
+}
+
+//任务5，自定义属性
+task root_task_5 << {
+    println '自定义属性！'
+    Map<String, ?> map = project.getProperties();
+    Iterator i = map.entrySet().iterator();
+    while (i.hasNext()) {
+        Object obj = i.next();
+        String key = obj.toString();
+        println key;
+    }
+    ext.myFirstProperty = "myPro_Value"
+}
+
+//任务6，打印其他任务设置的的属性
+task root_task_6 << {
+    println '打印自定义属性！'
+    println root_task_5.myFirstProperty
+}
+//有这个属性，才会执行任务6
+root_task_6.onlyIf { project.hasProperty('NoSkipTask6') }
+
+//任务7，打印当前目录下的文件名
+task root_task_7 << {
+    fileList('./').each { File file ->
+        println "$file.name"
+    }
+}
+
+//获取某个目录下文件名
+File[] fileList(String dir) {
+    file(dir).listFiles({ file -> file.isFile() } as FileFilter).sort()
+}
+
+//定义默认任务，gradle -q 直接输出默认任务结果，不需要输入任务名
+defaultTasks 'root_task_8_default', 'root_task_9_default'
+//任务8，默认任务
+task root_task_8_default << {
+    println '定义默认任务，任务名称：root_task_8'
+}
+//任务9，默认任务
+task root_task_9_default << {
+    println '定义默认任务，任务名称：root_task_9'
+}
+
+//任务10，打印某个任务的路径。
+task root_task_t_10 << {
+    println tasks.getByPath('root_task_hello').path;
+}
+
+//任务11，coyp任务，从copy_src目录到coyp_des目录
+task root_task_t_11(type: Copy)
+root_task_t_11 {
+    description 'Copies the copy_src directory to the copy_des directory.'
+    from 'copy_src'
+    into 'copy_des'
+    include('**/*.txt')
+}
+//禁用任务11
+root_task_t_11.enabled = false;
+
+println "##################### 示例文件 example.gradle 结束!"
