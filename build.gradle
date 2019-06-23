@@ -11,7 +11,6 @@ task auto_task1 {
     println '自动执行任务1，任务名称：auto_task1!'
 }
 
-//不带<<的任务，无论执行任何任务，它都会被执行
 task auto_task2 {
     println '自动执行任务2，任务名称：auto_task2!'
 }
@@ -49,7 +48,7 @@ buildscript {
 //allprojects指定所有参与构建的项目使用的仓库的来源
 //从根目录开始，一直到include进来的所有module，都会执行allprojects的内容。
 allprojects {
-    println "allprojects：项目所有module使用的仓库来源!!"
+    println "allprojects：项目所有module使用的仓库来源!!，除了顶层gradle，其他所有的projects也都会执行一遍"
     repositories {
         google()
         jcenter()

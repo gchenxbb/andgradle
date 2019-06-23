@@ -22,7 +22,7 @@ ext {
 
 //不带<<的任务，无论执行啥task都被执行
 task config_task_auto {
-    println '自动任务执行，任务名称：config_task_auto !'
+    println '自动任务执行3，任务名称：config_task_auto !'
 }
 
 //依赖任务不同输出

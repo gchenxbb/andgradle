@@ -82,7 +82,7 @@ task root_task_5 {
     while (i.hasNext()) {
         Object obj = i.next();
         String key = obj.toString();
-        println key;
+        //println key;
     }
     ext.myFirstProperty = "myPro_Value"
 }

@@ -5,9 +5,11 @@ println " 根目录："+rootDir
 
 include ':app'
 project(':app').projectDir=new File(rootDir,'app')
+println " app工程目录："+project(':app').projectDir
 
 include ':gradle_plugin'
 project(':gradle_plugin').projectDir=new File(rootDir,'plugin/gradle_plugin')
+println " 插件工程目录："+project(':gradle_plugin').projectDir
 
 println "##################### settings.gradle文件结束!"
 println ' '

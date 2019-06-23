@@ -55,6 +55,9 @@ innerClosure.call("in_value");
 
 println "##闭包结束"
 
+//引入插件1，名字在插件库的properties类型的名。
+apply plugin: 'gradle.plugin'
+
 buildscript {
     println "app模块首先执行 buildscript 代码!!!!"
     repositories {
@@ -67,8 +70,20 @@ buildscript {
     }
 }
 
-//引入插件，名字在插件库的properties类型的名。
-apply plugin: 'gradle.plugin'
+//引入插件2
+apply plugin: PluginImplTask2
+class PluginImplTask2 implements Plugin<Project> {
+    void apply(Project project) {
+        println "PluginImplTask2 apply!"
+        project.task('plugin_task_003') << {
+            println "Hello gradle plugin task 001!"
+        }
+
+        project.task('plugin_task_004') << {
+            println "Hello gradle plugin task 002!"
+        }
+    }
+}
 
 //这些是groovy类，要写到groovy文件里
 //例子,定义实体类
@@ -111,6 +126,9 @@ class Main {
 task app_auto_task {
     println 'app模块自动执行任务，任务名称：app_auto_task !'
 }
+
+
+apply from: 'flutter.gradle'
 
 println "##################### app模块的 build.gradle 结束! "
 println ' '
