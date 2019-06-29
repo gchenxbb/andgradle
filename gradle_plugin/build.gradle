@@ -11,14 +11,15 @@ dependencies {
 
 //必须要有groovy的源码src
 group = 'com.gradle.plugin'
-version = '1.0.0'
+version = '1.0.2'
 
 //发布到本地仓库,repo目录下生成jar文件
+//执行该任务时，需要注释掉app模块对插件的引用，生成后才加入引用
 uploadArchives {
     repositories {
         mavenDeployer {
-            repository(url: uri('../../repo'))
-    }
+            repository(url: uri('../repo'))
+        }
     }
 }
 
