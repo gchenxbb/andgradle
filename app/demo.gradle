@@ -1,0 +1,6 @@
+//根工程的build.gradle引入的gradle文件，
+println "##################### 示例文件 demo.gradle 开始!"
+
+
+
+println "##################### 示例文件 demo.gradle 结束!"
