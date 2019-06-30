@@ -1,5 +1,5 @@
 println " "
-println "##################### app模块的 build.gradle 开始! "
+println "##################### app模块的 build.gradle 开始! #####################"
 
 apply plugin: 'com.android.application'
 
@@ -43,6 +43,7 @@ buildscript {
 apply plugin: 'gradle.plugin'
 //引入插件2
 apply plugin: PluginImplTaskTwo
+apply from: 'groovy.gradle'
 
 class PluginImplTaskTwo implements Plugin<Project> {
 
@@ -74,6 +75,7 @@ class PluginImplTaskTwo implements Plugin<Project> {
                 into "zip/x2"
             }
         }
+        //afterEvaluate让afterProject方法在app模块的gradle结束后执行
         project.afterEvaluate this.&afterProject
         println "PluginImplTaskTwo apply end!"
     }
@@ -86,18 +88,57 @@ class PluginImplTaskTwo implements Plugin<Project> {
                 Task task = project.tasks.findByName("compile${variant.name.capitalize()}JavaWithJavac")
                 if (task) {
                     println(task.name)
-                    //    task.dependsOn project.plugin_task_005
                 }
             }
+
+            PluginMyTask pluginMyTask = project.tasks.create(name: "plugin_task_my_$variant.name", type: PluginMyTask) {
+                buildMode variant.name
+                myTaskValue "nichen"
+                srcDir project.file("${project.projectDir}/copy_src_dir")
+                println("pluginMyTask{}")
+            }
+
+            //依赖MyPluginTaskrenwu
+            Task PluginCopyTask = project.tasks.create(name: "plugin_task_copy_${variant.name}", type: Copy) {
+                description 'Copies the copy_src_dir directory to the copy_des_dir directory.'
+                dependsOn pluginMyTask
+                into "copy_des_dir"
+                with pluginMyTask.copyfile
+            }
         }
+
         if (project.android.hasProperty("applicationVariants")) {
             project.android.applicationVariants.all deps
         }
+
         println("after project：$project.displayName,end")
     }
 }
 
-apply from: 'groovy.gradle'
 
-println "##################### app模块的 build.gradle 结束! "
+class PluginMyTask extends DefaultTask {
+    String buildMode
+    String myTaskValue
+    File srcDir
+
+    CopySpec getCopyfile() {
+        return project.copySpec {
+            from "${srcDir}"
+            include "srcfileone${buildMode}.txt"
+        }
+    }
+
+    @TaskAction
+    void build() {
+        println("MyPluginTask build execute start!!")
+        println(myTaskValue)
+        //创建目录和文件
+        srcDir.mkdirs()
+        File srcFileOne = project.file("${srcDir.toPath()}/srcfileone${buildMode}.txt")
+        srcFileOne.createNewFile()
+        println("MyPluginTask build execute end!!")
+    }
+}
+
+println "##################### app模块的 build.gradle 结束! ##################### "
 println ' '

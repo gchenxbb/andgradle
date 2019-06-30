@@ -1,8 +1,10 @@
+println " "
+println "##################### mylibrary模块 build.gradle 开始! "
+
 apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 26
-
 
 
     defaultConfig {
@@ -32,3 +34,6 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 }
+
+println "##################### mylibrary模块 build.gradle 结束! "
+println ' '

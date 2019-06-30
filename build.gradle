@@ -1,6 +1,6 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 println ' '
-println "##################### 项目目录下的 build.gradle 开始! "
+println "##################### 项目根目录下的 build.gradle 开始! #####################"
 
 task clean(type: Delete) {
     delete rootProject.buildDir
@@ -47,7 +47,7 @@ apply from: 'config.gradle'
 apply from: 'example.gradle'
 apply from: 'closure.gradle'
 
-println "##################### 项目目录下的 build.gradle 结束! "
+println "##################### 项目根目录下的 build.gradle 结束! ##################### "
 println ' '
 
 
