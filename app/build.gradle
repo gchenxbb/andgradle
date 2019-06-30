@@ -9,8 +9,8 @@ android {
     defaultConfig {
         applicationId rootProject.ext.applicationId
         minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion  rootProject.ext.targetSdkVersion
-        versionCode  rootProject.ext.versionCode
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode rootProject.ext.versionCode
         versionName rootProject.ext.versionName
     }
     buildTypes {
@@ -35,10 +35,9 @@ buildscript {
         }
     }
     dependencies {
-       classpath 'com.gradle.plugin:gradle_plugin:1.0.2'//组名+库名+版本号
+        classpath 'com.gradle.plugin:gradle_plugin:1.0.2'//组名+库名+版本号
     }
 }
-
 
 //引入插件1，名字在插件库的properties类型的名。
 apply plugin: 'gradle.plugin'
@@ -46,58 +45,59 @@ apply plugin: 'gradle.plugin'
 apply plugin: PluginImplTaskTwo
 
 class PluginImplTaskTwo implements Plugin<Project> {
-    void apply(Project project) {
-        println "PluginImplTask2 apply!"
 
-        project.tasks.create('plugin_task_003') <<{
-            println "Hello gradle plugin task 003!"
+    private File zipFile;
+
+    void apply(Project project) {
+        println "PluginImplTaskTwo apply begin!"
+
+        project.tasks.create('plugin_task_003') << {
+            println "Hello gradle plugin_task_003！"
         }
 
         //自动执行任务
-        project.task('plugin_task_004')  {
+        project.task('plugin_task_004') {
             println "Hello gradle plugin task 004!"
         }
+
+        //压缩两个文件的任务,{}内容自动执行，压缩过程点击右侧任务名
+        zipFile = project.file("${project.projectDir}/zipbuildgradle.zip")
+        Task plugin_task_005 = project.tasks.create("plugin_task_005", Jar) {
+            destinationDir zipFile.parentFile
+            archiveName zipFile.name
+            println("任务5，压缩生成路径：$destinationDir")
+            println("任务5，压缩名字：$archiveName")
+            from("${project.projectDir}/build.gradle") {
+                into "zip/x1"
+            }
+            from("${project.projectDir}/build.gradle") {
+                into "zip/x2"
+            }
+        }
+        project.afterEvaluate this.&afterProject
+        println "PluginImplTaskTwo apply end!"
+    }
+
+    private void afterProject(Project project) {
+        println("after project：$project.displayName,start")
+        def deps = { variant ->
+            println(variant.name)
+            if (variant.name == 'debug') {
+                Task task = project.tasks.findByName("compile${variant.name.capitalize()}JavaWithJavac")
+                if (task) {
+                    println(task.name)
+                    //    task.dependsOn project.plugin_task_005
+                }
+            }
+        }
+        if (project.android.hasProperty("applicationVariants")) {
+            project.android.applicationVariants.all deps
+        }
+        println("after project：$project.displayName,end")
     }
 }
 
-//这些是groovy类，要写到groovy文件里
-//例子,定义实体类
-class Persion {
-    String name
-    int age
-
-    void eat(String food) {
-        println("好难吃的${food}");
-    }
-
-    @Override
-    String toString() {
-        return "Person{" +
-                "name='" + name + '\'' +
-                ", age=" + age +
-                '}'
-    }
-}
-
-class Main {
-    def chenguang = {
-        name = "chen"
-        age = 32
-        eat("包子")
-    }
-
-    static void main(String... args) {
-        Main main = new Main()
-        Persion persion = new Persion(name: "lilei", age: 14)
-        printf 'hello bibao?--------------'
-        println persion.toString()
-        main.chenguang.delegate = persion
-        main.chenguang.call()
-        println persion.toString()
-    }
-}
-
-apply from: 'demo.gradle'
+apply from: 'groovy.gradle'
 
 println "##################### app模块的 build.gradle 结束! "
 println ' '
