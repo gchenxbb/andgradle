@@ -44,8 +44,6 @@ apply plugin: 'gradle.plugin'
 //引入插件2
 apply plugin: PluginImplTaskTwo
 apply from: 'groovy.gradle'
-//apply from: 'flutter.gradle'
-
 
 class PluginImplTaskTwo implements Plugin<Project> {
 
