@@ -30,119 +30,23 @@ dependencies {
 buildscript {
     println "首先执行app模块build.gradle的 buildscript 代码!!!!"
     repositories {
-        maven {//引入自定义的插件，在外部repo目录下
+        //引入自定义的插件，在外部repo目录下
+        maven {
             url uri('../repo')
         }
     }
     dependencies {
-        classpath 'com.gradle.plugin:gradle_plugin:1.0.2'//组名+库名+版本号
+        classpath 'com.cx.plugin:plugin_module:1.0.3'//组名+库名+版本号
     }
 }
 
-//引入插件1，名字在插件库的properties类型的名。
-apply plugin: 'gradle.plugin'
-//引入插件2
-apply plugin: PluginImplTaskTwo
+//引入插件1，名字在插件库的properties文件名。
+apply plugin: 'plugin.mod'
+//引入插件2，在gradle文件定义的插件
+apply from: 'plugin.gradle'
+//引入
 apply from: 'groovy.gradle'
 
-class PluginImplTaskTwo implements Plugin<Project> {
-
-    private File zipFile;
-
-    void apply(Project project) {
-        println "PluginImplTaskTwo apply begin!"
-
-        project.tasks.create('plugin_task_003') << {
-            println "Hello gradle plugin_task_003！"
-        }
-
-        //自动执行任务
-        project.task('plugin_task_004') {
-            println "Hello gradle plugin task 004!"
-        }
-
-        //压缩两个文件的任务,{}内容自动执行，压缩过程点击右侧任务名
-        zipFile = project.file("${project.projectDir}/zipbuildgradle.zip")
-        Task plugin_task_005 = project.tasks.create("plugin_task_005", Jar) {
-            destinationDir zipFile.parentFile
-            archiveName zipFile.name
-            println("任务5，压缩生成路径：$destinationDir")
-            println("任务5，压缩名字：$archiveName")
-            from("${project.projectDir}/build.gradle") {
-                into "zip/x1"
-            }
-            from("${project.projectDir}/build.gradle") {
-                into "zip/x2"
-            }
-        }
-        //afterEvaluate让afterProject方法在app模块的gradle结束后执行
-        project.afterEvaluate this.&afterProject
-        println "PluginImplTaskTwo apply end!"
-    }
-
-    private void afterProject(Project project) {
-        println("after project：$project.displayName,start")
-        def deps = { variant ->
-            println(variant.name)
-            if (variant.name == 'debug') {
-                Task task = project.tasks.findByName("compile${variant.name.capitalize()}JavaWithJavac")
-                if (task) {
-                    println(task.name)
-                }
-            }
-
-            PluginMyTask pluginMyTask = project.tasks.create(name: "plugin_task_my_$variant.name", type: PluginMyTask) {
-                buildMode variant.name
-                myTaskValue "nichen"
-                srcDir project.file("${project.projectDir}/copy_src_dir")
-                println("pluginMyTask{}")
-            }
-
-            //依赖MyPluginTaskrenwu
-            Task PluginCopyTask = project.tasks.create(name: "plugin_task_copy_${variant.name}", type: Copy) {
-                description 'Copies the copy_src_dir directory to the copy_des_dir directory.'
-                dependsOn pluginMyTask
-                into "copy_des_dir"
-                with pluginMyTask.copyfile
-            }
-        }
-
-        if (project.android.hasProperty("applicationVariants")) {
-            project.android.applicationVariants.all deps
-        }
-
-        println("after project：$project.displayName,end")
-    }
-}
-
-
-class PluginMyTask extends DefaultTask {
-    String buildMode
-    String myTaskValue
-    File srcDir
-
-    CopySpec getCopyfile() {
-        return project.copySpec {
-            from "${srcDir}"
-            include "srcfileone${buildMode}.txt"
-        }
-    }
-
-    @TaskAction
-    void build() {
-        println("MyPluginTask build execute start!!")
-        println(myTaskValue)
-        //创建目录和文件
-        srcDir.mkdirs()
-        File srcFileOne = project.file("${srcDir.toPath()}/srcfileone${buildMode}.txt")
-        srcFileOne.createNewFile()
-        println("MyPluginTask build execute end!!")
-    }
-}
-
-//flutter {
-//    source '../..'
-//}
 
 println "##################### app模块的 build.gradle 结束! ##################### "
 println ' '

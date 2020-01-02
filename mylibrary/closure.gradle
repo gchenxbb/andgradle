@@ -1,0 +1,30 @@
+//根工程的build.gradle引入的gradle文件，
+println "##################### 示例文件 closure.gradle 开始!"
+
+println "##下面是闭包"
+
+//闭包赋值给变量
+def code = {
+    123456789
+}
+def innerClosure = {
+    String x ->
+        printf("打印，闭包 " + this + "\n")
+        printf("打印，闭包 " + owner + "\n")
+        printf("打印，闭包 " + delegate + "\n")
+        printf("闭包传入参数是：${x}\n")
+
+}
+//执行闭包对象
+println code.call()
+//两种调用方式
+innerClosure("in_value")
+innerClosure.call("in_value")
+
+//闭包内部，有三个内置对象this，owner，delegate
+//this 永远是指定义该闭包类，如果存在内部类，则是最内层的类，但this不是指当前闭包对象
+//owner 永远是指定义该闭包的类或者闭包，顾名思义，闭包只能定义在类中或者闭包中
+//delegate 默认是指owner，可以自己设置，自己设置的话又是什么情况
+
+
+println "##################### 示例文件 closure.gradle 结束!"

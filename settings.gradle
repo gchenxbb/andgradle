@@ -1,18 +1,18 @@
 println "##################### settings.gradle文件入口，gradle开始！#####################"
 
-println "##################### 引入模块!"
-println " 根目录：" + rootDir
+println "##################### 引入三个模块："
 
 include ':app'
 include ':mylibrary'
-include ':gradle_plugin'
+include ':plugin_module'
 
 project(':app').projectDir = new File(rootDir, 'app')
-project(':gradle_plugin').projectDir = new File(rootDir, 'gradle_plugin')
+project(':plugin_module').projectDir = new File(rootDir, 'plugin_module')
 
-println " app模块目录：" + project(':app').projectDir
-println " mulibrary模块目录：" + project(':mylibrary').projectDir
-println " gradle_plugin插件工程目录：" + project(':gradle_plugin').projectDir
+println " 根目录：" + rootDir
+println " app 模块目录：" + project(':app').projectDir
+println " mulibrary 模块目录：" + project(':mylibrary').projectDir
+println " plugin_module 模块目录：" + project(':plugin_module').projectDir
 
 println "##################### settings.gradle文件结束! #####################"
 println ' '

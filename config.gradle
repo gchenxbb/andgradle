@@ -1,40 +1,17 @@
 //根工程的build.gradle引入的gradle文件
-println "##################### 配置文件 config.gradle 开始!"
 
-//设定project自定义属性值
+//设置project自定义属性值
 ext {
-    age=33
-    phone=13162683391
-    address='shanghai'
-    myname='chen'
-    sex='man'
-    NoSkipTask7=1
+    age = 34
+    phone = 13162683391
+    address = 'shanghai'
+    myname = 'chenx'
+    sex = 'man'
+    NoSkipTask7 = 1
+    compileSdkVersion = 26
+    applicationId = "com.app.gradle"
+    minSdkVersion = 19
+    targetSdkVersion = 26
+    versionCode = 1
+    versionName = '1.0'
 }
-
-ext {
-    compileSdkVersion=26
-    applicationId="com.app.gradle"
-    minSdkVersion=19
-    targetSdkVersion=26
-    versionCode=1
-    versionName='1.0'
-}
-
-//依赖任务不同输出
-//whenReady 会在已发布的任务之前影响到已发布任务的执行。即使已发布的任务不是主要任务
-task distribution << {
-    println "we build the zip with version=$version"
-}
-task release(dependsOn: 'distribution') << {
-    println 'we release now'
-}
-
-gradle.taskGraph.whenReady { taskGraph ->
-    if (taskGraph.hasTask(release)) {
-        version = '1.0'
-    } else {
-        version = '1.0-SNAPSHOT'
-    }
-}
-
-println "##################### 配置文件 config.gradle 结束!"

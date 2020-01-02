@@ -1,0 +1,27 @@
+println " "
+println "##################### plugin_module 模块的 build.gradle 开始!!"
+
+apply plugin: 'groovy'
+apply plugin: 'maven'
+
+dependencies {
+    implementation gradleApi()
+    implementation localGroovy()
+}
+
+//设置组和版本号，必须有groovy的源码src，被引用时，组名：库名：版本号，库名是模块名
+group = 'com.cx.plugin'
+version = '1.0.3'
+
+//发布到本地仓库,repo目录下生成jar文件
+//执行该任务时，需要先注释掉app模块对插件的引用(app plugin)，生成后才加入引用
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: uri('../repo'))
+        }
+    }
+}
+
+println "##################### plugin_module 模块的 build.gradle 结束!!"
+println " "

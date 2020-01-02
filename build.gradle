@@ -1,6 +1,5 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
 println ' '
-println "##################### 项目根目录下的 build.gradle 开始! #####################"
+println "##################### 根目录 build.gradle 开始! #####################"
 
 task clean(type: Delete) {
     delete rootProject.buildDir
@@ -24,7 +23,6 @@ buildscript {
     repositories {
         jcenter()
         google()
-        //mavenLocal() //本地库，local repository(${user.home}/.m2/repository)
         mavenCentral()//Maven中心库(http://repo1.maven.org/maven2)
     }
     dependencies {
@@ -35,19 +33,16 @@ buildscript {
 //allprojects指定所有参与构建的项目使用的仓库的来源
 //从根目录开始，一直到include进来的所有module，都会执行allprojects的内容。
 allprojects {
-    println "allprojects：项目所有module使用的仓库来源!!，除了顶层gradle，其他所有的projects也都会执行一遍"
+    println "allprojects：项目所有module使用的仓库来源，除了顶层gradle，其他所有的projects也都会执行一遍"
     repositories {
         google()
         jcenter()
     }
 }
 
-//引入config.gradle、example.gradle、closure.gradle文件，执行完再回来。
 apply from: 'config.gradle'
-apply from: 'example.gradle'
-apply from: 'closure.gradle'
 
-println "##################### 项目根目录下的 build.gradle 结束! ##################### "
+println "##################### 根目录 build.gradle 结束! ##################### "
 println ' '
 
 

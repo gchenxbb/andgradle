@@ -1,0 +1,163 @@
+println "##################### 示例文件 task.gradle 开始!"
+
+//##################### 示例文件里都是一些定义的自动和非自动执行的任务!
+
+//不带<<的任务，无论执行任何任务，它都会被执行
+//自动任务1
+task example_auto_task1 {
+    description "自动执行任务描述"
+    println "自动执行任务1，任务名称：$example_auto_task1.name!"
+    println "自动执行任务1，任务描述：$example_auto_task1.description!"
+}
+
+//任务1，打印字符串
+task example_task_1 << {
+    String s = 'my_name'
+    println "Original:" + s + " Upper case:" + s.toUpperCase()
+}
+
+//定义几个被依赖的task
+task packageChannel_release_1 << {
+    println '打印：package_release_1'
+}
+task packageChannel_release_2 << {
+    println '打印：package_release_2'
+}
+task packageChannel_release_3 << {
+    println '打印：package_release_3'
+}
+
+//任务2，依赖任务1，因为2依赖1，因此gradle -q example_task_2，会先执行example_task_1
+task example_task_2(dependsOn: 'example_task_1') << {
+    description "渠道包"
+    println "我依赖 dependsOn :$example_task_1.name"
+}
+
+//任务2，同时依赖以上带packageChannel的任务，过滤出上面的3个
+example_task_2.dependsOn {
+    tasks.findAll { task -> task.name.startsWith('packageChannel') }
+}
+
+//任务3，输出0-6数字
+task example_task_3 << {
+    6.times { print "输出：$it  \n" }
+}
+
+//任务4，任务间通信。
+//doFirst和doLast 可以进行多次调用。他们分别被添加在任务的开头和结尾
+//<<可以替代oLast。
+task example_task_4 << {
+    println "我是任务4！"//第二执行
+}
+example_task_4.doFirst {
+    println "我在任务4前面执行！"//最先执行
+}
+example_task_4.doLast {
+    println "我在任务4后面执行！任务名称：$example_task_4.name"//第三执行
+    println project.hasProperty("example_task_4")
+}
+
+//任务5，设置自定义属性，任务6，读取属性
+//将任务5设置成自动执行，或任务6依赖任务5
+//在任务6执行时才会获取myFirstProperty自定义属性
+task example_task_5 << {
+    println '设置自定义属性！'
+    ext.myFirstProperty = "myFirstProperty"
+    ext.mySecondProperty = "mySecondProperty"
+}
+
+//任务6，打印其他任务设置的的属性
+task example_task_6(dependsOn: 'example_task_5') << {
+    println "打印自定义属性：$example_task_5.myFirstProperty"
+    println "打印自定义属性：$example_task_5.mySecondProperty"
+    println "自定义属性：${age}"
+    println "自定义属性：${myname}"
+    println "自定义属性：" + rootProject.ext.phone
+}
+
+//任务7，打印当前目录下的文件名
+task example_task_7 << {
+    fileList('./').each { File file ->
+        println "$file.name"
+    }
+}
+
+//获取某个目录下文件名
+File[] fileList(String dir) {
+    file(dir).listFiles({ file -> file.isFile() } as FileFilter).sort()
+}
+
+//有NoSkipTask7属性，才会执行任务7
+example_task_7.onlyIf {
+    def execute = project.hasProperty('NoSkipTask7')
+    execute
+}
+
+defaultTasks 'example_task_8_default'
+//任务8，默认任务，gradle -q 直接输出默认任务结果，不需要输入任务名
+task example_task_8_default << {
+    println '定义默认任务，任务名称：example_task_8'
+}
+
+//任务9，打印某个任务的路径。
+task example_task_9 << {
+    println tasks.getByPath('example_task_8_default').path
+    println tasks.getByPath('example_task_8_default').name
+}
+//禁用任务9
+example_task_9.enabled = true
+
+//任务10，coyp任务，从copy_src目录到coyp_des目录
+//一定要没有<<，{}内容自动执行，复制过程点击右侧任务名，否则无法复制
+task example_task_10(type: Copy) {
+    description 'Copies the copy_src directory to the copy_des directory.'
+    println '拷贝任务：从当前目录copy_src到copy_des'
+    from './copy_src'
+    into './copy_des'
+    include('**/*.txt')
+}
+
+//任务11，打印project所有属性
+task example_task_11 << {
+    Map<String, ?> map = project.getProperties()
+    Iterator i = map.entrySet().iterator()
+    while (i.hasNext()) {
+        Object obj = i.next()
+        String key = obj.toString()
+        println key
+    }
+}
+
+//任务12，任务组分在upload，在右侧upload项可以看到，其他在other项
+Task example_task_12 = task(example_task_12, group: BasePlugin.UPLOAD_GROUP) << {
+    description ' Task 12!'//AS中选中该项任务，光标选中可以看到描述
+    println "任务描述：${description}"
+    println "任务分组：${example_task_12.group}"
+}
+
+//定义3个动态任务,counter类似于传参，任务操纵
+//执行gradle -q task1，gradle -q task2，打印不同的counter
+3.times { counter ->
+    task "example_task_dynamic_$counter" << {
+        println "我是动态任务，任务名称：example_task_dynamic_$counter !"
+    }
+}
+
+//依赖任务不同输出
+//whenReady 会在已发布的任务之前影响到已发布任务的执行。即使已发布的任务不是主要任务
+task distribution << {
+    println "we build the zip with version=$version"
+}
+task release(dependsOn: 'distribution') << {
+    println 'we release now'
+}
+
+gradle.taskGraph.whenReady { taskGraph ->
+    if (taskGraph.hasTask(release)) {
+        version = '1.0'
+    } else {
+        version = '1.0-SNAPSHOT'
+    }
+}
+
+println "##################### 示例文件 task.gradle 结束!"

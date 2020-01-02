@@ -1,0 +1,113 @@
+println "##################### 示例文件 plugin.gradle 开始!"
+
+apply plugin: MyPluginImplTwo
+
+/**
+ * 自定义插件
+ */
+class MyPluginImplTwo implements Plugin<Project> {
+
+    private File zipFile
+
+    void apply(Project project) {
+        println "MyPluginImplTwo apply() begin!"
+
+        //定义三个任务
+
+        project.tasks.create('plugin_task_003_print') << {
+            println "Hello gradle plugin_task_003！"
+        }
+
+        //自动执行任务
+        project.task('plugin_task_004_auto') {
+            println "Hello gradle plugin_task_004_auto!"
+        }
+
+        zipFile = project.file("${project.projectDir}/zipbuildgradle.zip")
+
+        //压缩两个文件的任务,{}内容自动执行，压缩过程点击右侧任务名
+        project.tasks.create("plugin_task_005_zip", Jar) {
+            destinationDir zipFile.parentFile
+            archiveName zipFile.name
+            println("任务5，压缩生成路径和路径：$destinationDir,$archiveName")
+            println("任务5，压缩源文件：${project.projectDir}/build.gradle")
+            from("${project.projectDir}/build.gradle") {
+                into "zip/x1"
+            }
+            from("${project.projectDir}/plugin.gradle") {
+                into "zip/x2"
+            }
+        }
+        //afterEvaluate让afterProject方法在app模块的gradle结束后执行
+        project.afterEvaluate this.&afterProject
+        println "MyPluginImplTwo apply() end!"
+    }
+
+    //定义两个任务
+    private void afterProject(Project project) {
+        println("after project：$project.displayName,start，新增2个自定义任务")
+        def deps = { variant ->
+            println(variant.name)
+            if (variant.name == 'debug') {
+                Task task = project.tasks.findByName("compile${variant.name.capitalize()}JavaWithJavac")
+                if (task) {
+                    println(task.name)
+                }
+            }
+
+            //添加自定义任务类型
+            CreateFileTask createFileTask = project.tasks.create(name: "plugin_task_cf_$variant.name", type: CreateFileTask) {
+                buildMode variant.name
+                myTaskValue "chenx"
+                srcDir project.file("${project.projectDir}/copy_src_dir")
+                println("CreateFileTask{} auto。")
+            }
+
+            //依赖 CreateFileTask任务，复制，需要先生成
+            project.tasks.create(name: "plugin_task_copy_${variant.name}", type: Copy) {
+                description 'Copies the copy_src_dir directory to the copy_des_dir directory.'
+                dependsOn createFileTask
+                into "copy_des_dir"
+                with createFileTask.copyfile
+            }
+        }
+
+        if (project.android.hasProperty("applicationVariants")) {
+            project.android.applicationVariants.all deps
+        }
+
+        println("after project：$project.displayName,end")
+    }
+}
+
+class CreateFileTask extends DefaultTask {
+    String buildMode
+    String myTaskValue
+    File srcDir
+
+    CopySpec getCopyfile() {
+        return project.copySpec {
+            from "${srcDir}"
+            include "${myTaskValue}${buildMode}.txt"
+        }
+    }
+
+    @TaskAction
+    void build() {
+        println("CreateFileTask build execute start。")
+        //创建目录和文件
+        srcDir.mkdirs()
+        File file = project.file("${srcDir.toPath()}/${myTaskValue}${buildMode}.txt")
+        def sw = new StringWriter()
+        sw.append("$myTaskValue")
+        sw.append("\n")
+        sw.append("i am file content")
+        file.withWriter { writer ->
+            writer.append(sw.toString())
+        }
+        file.createNewFile()
+        println("CreateFileTask build execute end。")
+    }
+}
+
+println "##################### 示例文件 plugin.gradle 结束!"
