@@ -1,3 +1,12 @@
+
+先注释掉app模块以下引用
+
+//classpath 'com.cx.plugin:plugin_module:1.0.3'//组名+库名+版本号
+//apply plugin: 'plugin.mod'
+
+在插件模块点击uploadArchives编译插件，生成repo文件夹，再打开上面引用。
+
+
 1，任何一个 Gradle 构建都是由一个或多个 projects 组成，每个 project 包括许多可构建组成部分。例如每个project包含一个jar包。
 在项目中，每一个build.gradle文件会转换成一个Project对象
 Settings对象，每一个settings.gradle会转换成一个Settings对象

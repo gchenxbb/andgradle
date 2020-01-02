@@ -9,3 +9,4 @@
 .externalNativeBuild
 gradle_plugin/build/
 .idea/
+plugin_module/build
