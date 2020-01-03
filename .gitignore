@@ -10,3 +10,7 @@
 gradle_plugin/build/
 .idea/
 plugin_module/build
+repo
+app/copy_des_dir
+app/copy_src_dir
+mylibrary/copy_des

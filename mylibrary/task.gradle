@@ -1,73 +1,77 @@
 println "##################### 示例文件 task.gradle 开始!"
 
-//##################### 示例文件里都是一些定义的自动和非自动执行的任务!
+// 示例文件里都是一些定义的自动和非自动执行的任务!
 
-//不带<<的任务，无论执行任何任务，它都会被执行
-//自动任务1
-task example_auto_task1 {
+//不带<<的任务，无论执行任何任务都会被执行
+task example_auto_task(group: 'example') {
     description "自动执行任务描述"
-    println "自动执行任务1，任务名称：$example_auto_task1.name!"
-    println "自动执行任务1，任务描述：$example_auto_task1.description!"
+    println "自动执行任务1，任务名称：$example_auto_task.name!"
+    println "自动执行任务1，任务描述：$example_auto_task.description!"
 }
 
 //任务1，打印字符串
-task example_task_1 << {
+task example_task_1(group: 'example') << {
     String s = 'my_name'
     println "Original:" + s + " Upper case:" + s.toUpperCase()
+    println tasks.getByPath('example_auto_task').path
+    println tasks.getByPath('example_auto_task').name
+    println tasks.getByPath('example_auto_task').description
 }
 
 //定义几个被依赖的task
-task packageChannel_release_1 << {
-    println '打印：package_release_1'
+task packageChannel_release_1(group: 'example') << {
+    println '打印：packageChannel_release_1'
 }
-task packageChannel_release_2 << {
-    println '打印：package_release_2'
+task packageChannel_release_2(group: 'example') << {
+    println '打印：packageChannel_release_2'
 }
-task packageChannel_release_3 << {
-    println '打印：package_release_3'
-}
-
-//任务2，依赖任务1，因为2依赖1，因此gradle -q example_task_2，会先执行example_task_1
-task example_task_2(dependsOn: 'example_task_1') << {
-    description "渠道包"
-    println "我依赖 dependsOn :$example_task_1.name"
+task packageChannel_release_3(group: 'example') << {
+    println '打印：packageChannel_release_3'
 }
 
-//任务2，同时依赖以上带packageChannel的任务，过滤出上面的3个
-example_task_2.dependsOn {
-    tasks.findAll { task -> task.name.startsWith('packageChannel') }
+//任务2，依赖任务1,gradle -q example_task_2，会先执行example_task_1
+task example_task_2(group: 'example', description: "渠道包", dependsOn: 'example_task_1') {
+    dependsOn this.tasks.findAll { task
+        -> task.name.startsWith('packageChannel')
+    }
 }
 
 //任务3，输出0-6数字
-task example_task_3 << {
+task example_task_3(group: 'example') << {
     6.times { print "输出：$it  \n" }
 }
 
-//任务4，任务间通信。
-//doFirst和doLast 可以进行多次调用。他们分别被添加在任务的开头和结尾
-//<<可以替代oLast。
-task example_task_4 << {
+//任务4，doFirst和doLast 可以进行多次调用，分别被添加在任务的开头和结尾
+task example_task_4(group: 'example') << {
     println "我是任务4！"//第二执行
 }
+
 example_task_4.doFirst {
-    println "我在任务4前面执行！"//最先执行
+    println "我在任务4前面执行！-1"
 }
+
+//任务4最先执行
+example_task_4.doFirst {
+    println "我在任务4前面执行！-2"
+}
+
 example_task_4.doLast {
-    println "我在任务4后面执行！任务名称：$example_task_4.name"//第三执行
-    println project.hasProperty("example_task_4")
+    println "我在任务4后面执行！1"
+}
+
+example_task_4 << {
+    println "我在任务4后面执行！2"
 }
 
 //任务5，设置自定义属性，任务6，读取属性
-//将任务5设置成自动执行，或任务6依赖任务5
-//在任务6执行时才会获取myFirstProperty自定义属性
-task example_task_5 << {
+task example_task_5(group: 'example') << {
     println '设置自定义属性！'
     ext.myFirstProperty = "myFirstProperty"
     ext.mySecondProperty = "mySecondProperty"
 }
 
 //任务6，打印其他任务设置的的属性
-task example_task_6(dependsOn: 'example_task_5') << {
+task example_task_6(group: 'example', dependsOn: 'example_task_5') << {
     println "打印自定义属性：$example_task_5.myFirstProperty"
     println "打印自定义属性：$example_task_5.mySecondProperty"
     println "自定义属性：${age}"
@@ -76,15 +80,11 @@ task example_task_6(dependsOn: 'example_task_5') << {
 }
 
 //任务7，打印当前目录下的文件名
-task example_task_7 << {
-    fileList('./').each { File file ->
+task example_task_7(group: 'example') << {
+    file('./').listFiles({ file -> file.isFile() } as FileFilter)
+            .sort().each { File file ->
         println "$file.name"
     }
-}
-
-//获取某个目录下文件名
-File[] fileList(String dir) {
-    file(dir).listFiles({ file -> file.isFile() } as FileFilter).sort()
 }
 
 //有NoSkipTask7属性，才会执行任务7
@@ -92,24 +92,18 @@ example_task_7.onlyIf {
     def execute = project.hasProperty('NoSkipTask7')
     execute
 }
+//禁用任务7
+example_task_7.enabled = true
 
 defaultTasks 'example_task_8_default'
 //任务8，默认任务，gradle -q 直接输出默认任务结果，不需要输入任务名
-task example_task_8_default << {
+task example_task_8_default(group: 'example') << {
     println '定义默认任务，任务名称：example_task_8'
 }
 
-//任务9，打印某个任务的路径。
-task example_task_9 << {
-    println tasks.getByPath('example_task_8_default').path
-    println tasks.getByPath('example_task_8_default').name
-}
-//禁用任务9
-example_task_9.enabled = true
-
-//任务10，coyp任务，从copy_src目录到coyp_des目录
+//任务9，从copy_src目录到coyp_des目录
 //一定要没有<<，{}内容自动执行，复制过程点击右侧任务名，否则无法复制
-task example_task_10(type: Copy) {
+task example_task_9(group: 'example', type: Copy) {
     description 'Copies the copy_src directory to the copy_des directory.'
     println '拷贝任务：从当前目录copy_src到copy_des'
     from './copy_src'
@@ -117,8 +111,8 @@ task example_task_10(type: Copy) {
     include('**/*.txt')
 }
 
-//任务11，打印project所有属性
-task example_task_11 << {
+//任务10，打印project所有属性
+task example_task_10(group: 'example') << {
     Map<String, ?> map = project.getProperties()
     Iterator i = map.entrySet().iterator()
     while (i.hasNext()) {
@@ -138,7 +132,7 @@ Task example_task_12 = task(example_task_12, group: BasePlugin.UPLOAD_GROUP) << 
 //定义3个动态任务,counter类似于传参，任务操纵
 //执行gradle -q task1，gradle -q task2，打印不同的counter
 3.times { counter ->
-    task "example_task_dynamic_$counter" << {
+    task "example_task_dynamic_$counter"(group: 'example') << {
         println "我是动态任务，任务名称：example_task_dynamic_$counter !"
     }
 }
