@@ -36,3 +36,9 @@ Settings对象，每一个settings.gradle会转换成一个Settings对象
 每个build.gradle文件的内容，基本上是Groovy脚本，脚本使用了最简化的Groovy语法
 
 7，Gradle是一个基于JVM的构建工具，Groovy代码可以和Java代码很好地结合，也能用于扩展现有代码。
+
+8，有三个内置对象this，owner，delegate
+this 定义闭包的类
+owner 定义闭包的类或者闭包，如果在闭包中定义一个闭包，owner指向外面闭包，在类中定义的闭包，同this一致
+delegate 默认是和owner一致，或者自定义delegate指向
+

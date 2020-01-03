@@ -1,6 +1,4 @@
-println "##################### settings.gradle文件入口，gradle开始！#####################"
-
-println "##################### 引入三个模块："
+println "\n##################### settings.gradle开始！gradle入口"
 
 include ':app'
 include ':mylibrary'
@@ -14,5 +12,4 @@ println " app 模块目录：" + project(':app').projectDir
 println " mulibrary 模块目录：" + project(':mylibrary').projectDir
 println " plugin_module 模块目录：" + project(':plugin_module').projectDir
 
-println "##################### settings.gradle文件结束! #####################"
-println ' '
+println "##################### settings.gradle文件结束! \n"

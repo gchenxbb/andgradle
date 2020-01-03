@@ -1,4 +1,4 @@
-println "##################### 示例文件 plugin.gradle 开始!"
+println "\n##################### 示例文件 plugin.gradle 开始!"
 
 apply plugin: MyPluginImplTwo
 

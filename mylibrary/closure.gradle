@@ -1,30 +1,109 @@
 //根工程的build.gradle引入的gradle文件，
-println "##################### 示例文件 closure.gradle 开始!"
+println "\n##################### 示例文件 closure.gradle 开始!"
 
-println "##下面是闭包"
-
-//闭包赋值给变量
+//一个闭包赋值给一个变量
 def code = {
     123456789
 }
-def innerClosure = {
-    String x ->
-        printf("打印，闭包 " + this + "\n")
-        printf("打印，闭包 " + owner + "\n")
-        printf("打印，闭包 " + delegate + "\n")
-        printf("闭包传入参数是：${x}\n")
 
-}
 //执行闭包对象
-println code.call()
+println code()
+
+def swt = { String x, int y ->
+    println "闭包入参： ${x} the value is ${y}"
+}
+
 //两种调用方式
-innerClosure("in_value")
-innerClosure.call("in_value")
+swt.call("tes", 12)
+swt("tes", 13)
 
-//闭包内部，有三个内置对象this，owner，delegate
-//this 永远是指定义该闭包类，如果存在内部类，则是最内层的类，但this不是指当前闭包对象
-//owner 永远是指定义该闭包的类或者闭包，顾名思义，闭包只能定义在类中或者闭包中
-//delegate 默认是指owner，可以自己设置，自己设置的话又是什么情况
+class AndroidX {
+    String buildToolsVersionX = "25.0.0"
+    int compileSdkVersionX = 25
+
+    private DefaultConfigX mDefaultConfigX
+
+    AndroidX() {
+        this.mDefaultConfigX = new DefaultConfigX()
+    }
+
+    void compileSdkX(int target) {
+        compileSdkVersionX = target
+    }
+
+    void buildToolsX(String target) {
+        buildToolsVersionX = target
+    }
+
+    void defaultConfig(Closure closure) {
+        closure.setDelegate(mDefaultConfigX)
+        closure.setResolveStrategy(Closure.DELEGATE_FIRST)
+        closure.call()
+    }
+
+    @Override
+    String toString() {
+        return "AndroidX{" +
+                "compileSdkVersionX='" + compileSdkVersionX + '\'' +
+                ", buildToolsVersionX=" + buildToolsVersionX +
+                ", DefaultConfigX=" + mDefaultConfigX +
+                '}'
+    }
+}
+
+class DefaultConfigX {
+    private int mVersionCode
+    private String mVersionName = ''
+    private int mMinSdkVersion
+    private int mTargetSdkVersion
+
+    void versionCodeX(int versionCode) {
+        mVersionCode = versionCode
+    }
+
+    void versionNameX(String versionName) {
+        mVersionName = versionName
+    }
+
+    void minSdkVersionX(int minSdkVersion) {
+        mMinSdkVersion = minSdkVersion
+    }
 
 
-println "##################### 示例文件 closure.gradle 结束!"
+    def targetSdkVersionX(int targetSdkVersion) {
+        mTargetSdkVersion = targetSdkVersion
+    }
+
+    @Override
+    String toString() {
+        return "DefaultConfigX{" +
+                "mVersionCode=" + mVersionCode +
+                ", mVersionName='" + mVersionName + '\'' +
+                ", mMinSdkVersion=" + mMinSdkVersion +
+                ", mTargetSdkVersion=" + mTargetSdkVersion +
+                '}'
+    }
+}
+
+//如果是Closure参数，可以用xx{}，如下defaultConfig {}
+//在实际的android{}中，就是android方法的闭包参数
+def androidx = {
+    compileSdkX 28
+    buildToolsX "28.0.2"
+    defaultConfig {
+        minSdkVersionX 19
+        targetSdkVersionX 28
+        versionCodeX 1
+        versionNameX "1.0"
+    }
+}
+
+printf '闭包delegate：\n'
+AndroidX androidX = new AndroidX()
+println androidX.toString()
+//设置闭包的delegate，指向androidX对象，变量需要一致。
+androidx.delegate = androidX
+androidx.call()
+println androidX.toString()
+
+println "##################### 示例文件 closure.gradle 结束!\n"

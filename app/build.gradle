@@ -1,5 +1,4 @@
-println " "
-println "##################### app模块的 build.gradle 开始! #####################"
+println "\n##################### app模块的 build.gradle 开始! #####################"
 
 apply plugin: 'com.android.application'
 
@@ -44,9 +43,5 @@ buildscript {
 apply plugin: 'plugin.mod'
 //引入插件2，在gradle文件定义的插件
 apply from: 'plugin.gradle'
-//引入
-apply from: 'groovy.gradle'
 
-
-println "##################### app模块的 build.gradle 结束! ##################### "
-println ' '
+println "##################### app模块的 build.gradle 结束! \n"

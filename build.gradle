@@ -1,5 +1,4 @@
-println ' '
-println "##################### 根目录 build.gradle 开始! #####################"
+println "\n##################### 根目录 build.gradle 开始! "
 
 task clean(type: Delete) {
     delete rootProject.buildDir
@@ -42,8 +41,7 @@ allprojects {
 
 apply from: 'config.gradle'
 
-println "##################### 根目录 build.gradle 结束! ##################### "
-println ' '
+println "##################### 根目录 build.gradle 结束! \n "
 
 
 

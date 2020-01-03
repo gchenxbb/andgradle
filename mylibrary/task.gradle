@@ -1,4 +1,4 @@
-println "##################### 示例文件 task.gradle 开始!"
+println "\n##################### 示例文件 task.gradle 开始!"
 
 // 示例文件里都是一些定义的自动和非自动执行的任务!
 
@@ -9,13 +9,15 @@ task example_auto_task(group: 'example') {
     println "自动执行任务1，任务描述：$example_auto_task.description!"
 }
 
-//任务1，打印字符串
+//任务1
 task example_task_1(group: 'example') << {
     String s = 'my_name'
     println "Original:" + s + " Upper case:" + s.toUpperCase()
     println tasks.getByPath('example_auto_task').path
     println tasks.getByPath('example_auto_task').name
     println tasks.getByPath('example_auto_task').description
+    println "任务描述：${example_task_1.description}"
+    println "任务分组：${example_task_1.group}"
 }
 
 //定义几个被依赖的task
@@ -101,7 +103,7 @@ task example_task_8_default(group: 'example') << {
     println '定义默认任务，任务名称：example_task_8'
 }
 
-//任务9，从copy_src目录到coyp_des目录
+//任务9，复制任务
 //一定要没有<<，{}内容自动执行，复制过程点击右侧任务名，否则无法复制
 task example_task_9(group: 'example', type: Copy) {
     description 'Copies the copy_src directory to the copy_des directory.'
@@ -112,7 +114,7 @@ task example_task_9(group: 'example', type: Copy) {
 }
 
 //任务10，打印project所有属性
-task example_task_10(group: 'example') << {
+this.tasks.create(name: "example_task_10", group: "example", description: "print all property") << {
     Map<String, ?> map = project.getProperties()
     Iterator i = map.entrySet().iterator()
     while (i.hasNext()) {
@@ -122,15 +124,13 @@ task example_task_10(group: 'example') << {
     }
 }
 
-//任务12，任务组分在upload，在右侧upload项可以看到，其他在other项
-Task example_task_12 = task(example_task_12, group: BasePlugin.UPLOAD_GROUP) << {
-    description ' Task 12!'//AS中选中该项任务，光标选中可以看到描述
-    println "任务描述：${description}"
-    println "任务分组：${example_task_12.group}"
+//任务12
+task(example_task_12, group: "example") << {
+    println ' Task 12!'
 }
 
-//定义3个动态任务,counter类似于传参，任务操纵
-//执行gradle -q task1，gradle -q task2，打印不同的counter
+//定义3个动态任务
+//gradle -q task1，gradle -q task2
 3.times { counter ->
     task "example_task_dynamic_$counter"(group: 'example') << {
         println "我是动态任务，任务名称：example_task_dynamic_$counter !"
@@ -139,18 +139,18 @@ Task example_task_12 = task(example_task_12, group: BasePlugin.UPLOAD_GROUP) << 
 
 //依赖任务不同输出
 //whenReady 会在已发布的任务之前影响到已发布任务的执行。即使已发布的任务不是主要任务
-task distribution << {
+task pubdistribution(group: 'example') << {
     println "we build the zip with version=$version"
 }
-task release(dependsOn: 'distribution') << {
+task pubrelease(group: 'example', dependsOn: 'pubdistribution') << {
     println 'we release now'
 }
 
 gradle.taskGraph.whenReady { taskGraph ->
-    if (taskGraph.hasTask(release)) {
-        version = '1.0'
+    if (taskGraph.hasTask(pubrelease)) {
+        version = '1.1'
     } else {
-        version = '1.0-SNAPSHOT'
+        version = '1.1-SNAPSHOT'
     }
 }
 
